@@ -12,14 +12,15 @@ st.set_page_config(
     layout="centered"
 )
 
+
 project_root = Path(__file__).parent
-checkpoint_path = (
-    project_root / "checkpoints" / "mini_transformer.pt"
-)
+checkpoint_path = project_root / "checkpoints" / "mini_transformer.pt"
 
 
 @st.cache_resource
 def load_model():
+    """Load the trained model and character vocabulary once."""
+
     checkpoint = torch.load(
         checkpoint_path,
         map_location="cpu",
@@ -39,6 +40,7 @@ def load_model():
 
 model, char_to_id, id_to_char = load_model()
 
+
 st.title("Mini Transformer Text Generator")
 
 st.write(
@@ -46,14 +48,14 @@ st.write(
     "one character at a time."
 )
 
+
 prompt = st.text_area(
     "Starting text",
-    value="ROMEO:",
-    height=100
+    value="ROMEO:"
 )
 
 length = st.slider(
-    "Characters to generate",
+    "Minimum characters to generate",
     min_value=50,
     max_value=500,
     value=200,
@@ -68,35 +70,79 @@ temperature = st.slider(
     step=0.1
 )
 
-if st.button("Generate", type="primary"):
+st.caption(
+    "The model may generate a few extra characters to finish the sentence."
+)
+
+
+if st.button("Generate"):
     if not prompt:
-        prompt = "\n"
-
-    unsupported = sorted(set(prompt) - set(char_to_id))
-
-    if unsupported:
-        st.error(f"Unsupported characters: {unsupported}")
+        st.warning("Enter some starting text.")
 
     else:
-        input_tokens = torch.tensor(
-            [[char_to_id[character] for character in prompt]],
-            dtype=torch.long
+        unsupported_characters = sorted(
+            set(prompt) - set(char_to_id)
         )
 
-        with st.spinner("Generating text..."):
-            output_tokens = model.generate(
-                input_tokens,
-                max_new_tokens=length,
-                temperature=temperature
+        if unsupported_characters:
+            readable_characters = ", ".join(
+                repr(character)
+                for character in unsupported_characters
             )
 
-        generated_text = "".join(
-            id_to_char[token]
-            for token in output_tokens[0].tolist()
-        )
+            st.error(
+                "The model does not recognize these characters: "
+                f"{readable_characters}"
+            )
 
-        st.text_area(
-            "Generated text",
-            value=generated_text,
-            height=350
-        )
+        else:
+            input_tokens = torch.tensor(
+                [[char_to_id[character] for character in prompt]],
+                dtype=torch.long
+            )
+
+            with st.spinner("Generating text..."):
+                output_tokens = model.generate(
+                    input_tokens,
+                    max_new_tokens=length + 300,
+                    temperature=temperature
+                )
+
+            generated_text = "".join(
+                id_to_char[token]
+                for token in output_tokens[0].tolist()
+            )
+
+            # Search for a natural ending after the minimum length.
+            target_end = len(prompt) + length
+            search_start = max(len(prompt), target_end - 1)
+
+            ending = next(
+                (
+                    index + 1
+                    for index in range(
+                        search_start,
+                        len(generated_text)
+                    )
+                    if generated_text[index] in ".!?"
+                ),
+                None
+            )
+
+            # If there is no punctuation, stop between words.
+            if ending is None:
+                ending = generated_text.rfind(
+                    " ",
+                    target_end
+                )
+
+                if ending == -1:
+                    ending = len(generated_text)
+
+            generated_text = generated_text[:ending].rstrip()
+
+            st.text_area(
+                "Generated text",
+                value=generated_text,
+                height=350
+            )
