@@ -314,4 +314,3 @@ The project intentionally uses a small architecture so its components can be tra
 * Repeat experiments using multiple random seeds
 * Add top-k and top-p sampling
 * Add a reproducible command-line training script
-* Deploy the Gradio application with a public URL
