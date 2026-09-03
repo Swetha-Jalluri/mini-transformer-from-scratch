@@ -1,12 +1,11 @@
 # Mini Transformer from Scratch
 
-A character-level, decoder-only Transformer built from scratch using PyTorch. The model learns patterns from Shakespeare’s writing and generates new text one character at a time.
+This project began with a simple question: what happens inside a Transformer between receiving a piece of text and predicting what comes next?
 
-This project was created to understand what happens inside a Transformer—not simply how to use a pretrained model.
+To explore that process, I built a small character-level Transformer in PyTorch and trained it on Tiny Shakespeare. The model reads a sequence of characters, studies their relationships through self-attention, and predicts the next character. It then adds that prediction to the sequence and repeats the process to generate new text.
 
-> This implementation does not use `nn.Transformer`, `nn.MultiheadAttention`, or a pretrained language model.
+The project grew one component at a time—from tokenization and embeddings to causal attention, Transformer blocks, training, evaluation, and text generation. I also compared the model with an LSTM baseline, visualized an attention head, added automated tests, and connected the trained model to a local Gradio interface.
 
-**Current status:** Trained, tested, and running locally through a Gradio application. Public deployment is planned.
 
 ## Why I Built This
 
