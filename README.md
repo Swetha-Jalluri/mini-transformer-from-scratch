@@ -74,16 +74,15 @@ Every token creates three vectors:
 
 The attention calculation is:
 
-$$
-\text{Attention}(Q,K,V)
+```math
+\operatorname{Attention}(Q,K,V)
 =
-\text{softmax}
-\left(
-\frac{QK^T}{\sqrt{d_k}} + M
+\operatorname{softmax}\left(
+\frac{QK^\top}{\sqrt{d_k}} + M
 \right)V
-$$
+```
 
-The scores are divided by \(\sqrt{d_k}\) to keep their values stable. The causal mask \(M\) prevents the model from viewing future characters during training.
+The scores are divided by the square root of the key dimension to keep their values stable. The causal mask `M` prevents the model from viewing future characters during training.
 
 ### 4. Multiple Heads Learn Different Patterns
 
