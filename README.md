@@ -20,7 +20,7 @@ This model learns a similar pattern, but it predicts individual characters:
 R → O → M → E → O → :
 ```
 
-Each prediction is added to the text and used as context for the following prediction.
+Each prediction is added to the existing text and used as context for the following prediction.
 
 ## Architecture
 
@@ -55,7 +55,7 @@ The Tiny Shakespeare dataset creates a vocabulary of 65 unique characters.
 
 A token ID identifies a character, but it does not describe how that character is being used.
 
-The model converts each token into a learned vector called a **token embedding**. It also adds a **positional embedding** to represent where the character appears in the sequence.
+The model converts each token into a learned vector called a **token embedding**. It also adds a **positional embedding** so the model knows where the character appears in the sequence.
 
 ```text
 Token embedding    → What is the character?
@@ -74,15 +74,11 @@ Every token creates three vectors:
 
 The attention calculation is:
 
-```math
-\operatorname{Attention}(Q,K,V)
-=
-\operatorname{softmax}\left(
-\frac{QK^\top}{\sqrt{d_k}} + M
-\right)V
+```text
+Attention(Q, K, V) = softmax((Q × Kᵀ) / √dₖ + mask) × V
 ```
 
-The scores are divided by the square root of the key dimension to keep their values stable. The causal mask `M` prevents the model from viewing future characters during training.
+The scores are divided by the square root of the key dimension to keep their values stable. The causal mask prevents the model from viewing future characters during training.
 
 ### 4. Multiple Heads Learn Different Patterns
 
@@ -148,9 +144,9 @@ PyTorch is used for:
 * Basic neural-network layers
 * Optimization and model saving
 
-The main implementation includes:
+The implementation includes:
 
-* Character-level tokenizer
+* Character-level tokenization
 * Token and positional embeddings
 * Query, Key, and Value projections
 * Scaled dot-product attention
@@ -178,7 +174,7 @@ The main implementation includes:
 
 ## Transformer vs. LSTM
 
-To provide a baseline, an LSTM was trained using the same dataset and similar training conditions.
+An LSTM was trained on the same dataset with a similar model size and training setup to provide a baseline.
 
 | Model       | Parameters | Train Loss | Validation Loss | Perplexity | Training Time |
 | ----------- | ---------: | ---------: | --------------: | ---------: | ------------: |
@@ -199,7 +195,7 @@ The training and validation loss curves show how the model improved during train
 
 ## Attention Visualization
 
-This heatmap shows which earlier characters one attention head focused on.
+The heatmap shows which earlier characters one attention head focused on.
 
 The empty upper-right area confirms that causal masking prevented the model from viewing future positions.
 
@@ -318,3 +314,4 @@ The project intentionally uses a small architecture so its components can be tra
 * Repeat experiments using multiple random seeds
 * Add top-k and top-p sampling
 * Add a reproducible command-line training script
+* Deploy the Gradio application with a public URL
